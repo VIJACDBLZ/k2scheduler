@@ -1,0 +1,62 @@
+.dropdown {
+  margin: 0px;
+}
+
+.dropdown-menu {
+  max-height: 20rem;
+  overflow-y: auto;
+  width:20rem;
+}
+
+#request-form {
+    margin-top:20px;
+    width:100%;
+}
+#container{
+    margin-top:20px;
+    width:100%;
+}
+
+.dataTables_length{
+    width:75px;
+}
+
+#benchmark-table{
+    font-size:13px;
+}
+
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.overlay-content {
+  position: relative;
+  top: 10%;
+  width: 100%;
+  text-align: center;
+  margin-top: 0px;
+}
+
+.overlay .closebtn {
+  position: absolute;
+  top: -20px;
+  right: 5px;
+  font-size: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .overlay a {font-size: 20px}
+  .overlay .closebtn {
+    font-size: 40px;
+    top: 15px;
+    right: 35px;
+  }
+}

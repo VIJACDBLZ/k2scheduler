@@ -1,0 +1,23 @@
+[
+  {
+    "jobId":"f55955b6-1be6-4e84-ae68-75aaabccf01b",
+    "jobName":"AccountDIM",
+    "jobGroup": "B2B-Voice",
+    "cronExpression": "0/5 * * * * ?",
+    "deploymentId": "221",
+    "description": "test",
+    "batchType": "VCE_ACCT_DIM"
+
+  },
+  {
+    "jobId":"f55955b6-1be6-4e84-ae68-75aaabccf01c",
+    "jobName":"ProductDIM",
+    "jobGroup": "B2B-Voice",
+    "cronExpression": "0/5 * * * * ?",
+    "deploymentId": "223",
+    "description": "test",
+    "batchType": "VCE_PROD_DIM"
+
+  }
+
+]
