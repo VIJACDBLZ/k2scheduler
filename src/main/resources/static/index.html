@@ -6,15 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/css/bootstrap.datatable.min.css"/>
     <link rel="stylesheet" href="/css/main.css"/>
 
-    <title>QTester</title>
+    <title>K2Scheduler</title>
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand">K2 Scheduler</a>
+        <a class="navbar-brand"><b>K2 </b>Scheduler</a>
         <div class="dropdown mr-auto">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_groups" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false">
@@ -29,24 +31,30 @@
             </div>
         </div>
         <form class="form-inline">
-            <input class="form-control mr-sm-2" type="search" id="benchmarkId" placeholder="Benchmark ID" aria-label="RequestID">
-            <button class="btn btn-outline-success my-2 my-sm-0" id="load-benchmark" type="button">Show Details</button>
+            <button class="btn btn-success my-2 my-sm-0" id="createJobInit" type="button">Create Job</button>
+            <span style="width:10px"></span>
+            <button class="btn btn-danger my-2 my-sm-0 disabled" id="runAll" type="button">Run All</button>
         </form>
+
     </nav>
 
-    <div class="container">
+    <div class="container-fluid">
 
         <div class="row">
+            <div id="jobs-listing">
             <table id="jobs-table" class="table table-sm table-striped" style="width:100%">
                 <thead>
                 <tr>
-                    <th>JobId</th>
-                    <th>Name</th>
+                    <th>Id</th>
+                    <th>Job Name</th>
                     <th>Group</th>
                     <th>Status</th>
-                    <th>CronExpression</th>
-                    <th>Desc</th>
-                    <th>InterfaceName</th>
+                    <th>Cron</th>
+                    <th>Batch Type</th>
+                    <th>Dep ID</th>
+                    <th>Depends On</th>
+                    <th>Next Execution</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -54,77 +62,103 @@
                 </tbody>
             </table>
         </div>
-
-        <!--<div class="row">
-            <form role="form" id="request-form">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="first-endpoint" autocomplete="off" id="first-endpoint" placeholder="First Endpoint">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="second-endpoint" autocomplete="off" id="second-endpoint" placeholder="Second Endpoint">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <textarea class="form-control textarea" rows="10" name="Payload" id="request-template" placeholder="Request Payload"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="alert alert-primary" id="placeholder-display" role-="alert">
-                            Placeholder text file not loader yet!
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="btn btn-dark btn-file">
-                            Params File<input type="file" accept=".txt" name="request-file" id="request-file" style="display: none;">
-                        </label>
-                    </div>
-                    <div class="col-md-6">
-                        <button type="button" id="start-benchmark" class="btn btn-danger float-right">Start</button>
-                    </div>
-                </div>
-            </form>
-
-
-        </div>-->
-
-
-
-    </div>
-
-    <div id="benchmark-details" class="overlay">
-        <a href="javascript:void(0)" class="closebtn" id="hide-benchmark">&times;</a>
-        <div class="overlay-content">
-            <div class="alert alert-success" role="alert">  </div>
-            <table id="benchmark-table" class="table table-sm table-striped" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Request</th>
-                        <th>Url</th>
-                        <th>Response</th>
-                        <th>Latency</th>
-                        <th>Url</th>
-                        <th>Response</th>
-                        <th>Latency</th>
-                        <th>Identical?</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
         </div>
     </div>
+
+    <!--Job Details Overlay-->
+
+    <div id="job-details" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" id="hide-details">&times;</a>
+        <div class="overlay-content">
+
+        </div>
+    </div>
+
+    <!--Modal Job Edit-->
+    <div id="editJobModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editJobModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="update-job-title">Update Job</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Cron Expression</label>
+                            <input id="update-cron-expression" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Deployment ID</label>
+                            <input id="update-deployment-id" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Depends on Batch Type(s)</label>
+                            <input id="update-depends-on-batchtypes" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                        <input type="button" class="btn btn-info" id="updateJob" value="Update">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Modal Job Create-->
+    <div id="createJobModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="createJobModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="create-job-title">Create Job</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Job Name</label>
+                            <input id="create-jobname" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Job Group</label>
+                            <input id="create-jobgroup" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Batch Type</label>
+                            <input id="create-batchtype" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Cron Expression</label>
+                            <input id="create-cronexpression" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Deployment ID</label>
+                            <input id="create-deploymentid" type="text" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Depends on Batch Type(s)</label>
+                            <input id="create-dependsonbatchtypes" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                        <input type="button" class="btn btn-info" id="createJob" value="Create">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!--    ############################################ NOTIFICATION TOAST #########################################-->
+    <div class="notification">
+        <div class="alert alert-warning" role="alert">
+            <span><b id="notification-content">Loading..</b></span>
+        </div>
+    </div>
+
 
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

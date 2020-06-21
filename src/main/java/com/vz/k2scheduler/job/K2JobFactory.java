@@ -57,14 +57,14 @@ public class K2JobFactory implements Job {
     }
 
 
-    public static List<ScheduleJob> getInitAllJobs() {
+    public static List<ScheduleJob> getAllJobFromConfig() {
         loadConfiguration();
         return jobList;
     }
 
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext) {
         ScheduleJob scheduleJob = (ScheduleJob)jobExecutionContext.getMergedJobDataMap().get("scheduleJob");
 
 

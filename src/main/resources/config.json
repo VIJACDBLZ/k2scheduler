@@ -1,23 +1,56 @@
 [
   {
-    "jobId":"f55955b6-1be6-4e84-ae68-75aaabccf01b",
+    "jobId":"1",
     "jobName":"AccountDIM",
     "jobGroup": "B2B-Voice",
-    "cronExpression": "0/5 * * * * ?",
-    "deploymentId": "221",
+    "cronExpression": "0 */30 * ? * *",
+    "deploymentId": 221,
     "description": "test",
-    "batchType": "VCE_ACCT_DIM"
+    "batchType": "VCE_ACCT_DIM",
+    "dependsOnBatchTypes": []
+  },
+  {
+    "jobId":"2",
+    "jobName":"ProductDIM",
+    "jobGroup": "B2B-Voice",
+    "cronExpression": "0 */30 * ? * *",
+    "deploymentId": 223,
+    "description": "test",
+    "batchType": "VCE_PROD_DIM",
+    "dependsOnBatchTypes": []
 
   },
   {
-    "jobId":"f55955b6-1be6-4e84-ae68-75aaabccf01c",
-    "jobName":"ProductDIM",
+    "jobId":"3",
+    "jobName":"FactDIM",
     "jobGroup": "B2B-Voice",
-    "cronExpression": "0/5 * * * * ?",
-    "deploymentId": "223",
+    "cronExpression": "0 */30 * ? * *",
+    "deploymentId": 223,
     "description": "test",
-    "batchType": "VCE_PROD_DIM"
+    "batchType": "VCE_FACT_DIM",
+    "dependsOnBatchTypes": []
+
+  },
+  {
+    "jobId":"4",
+    "jobName":"VoiceAccountStaging",
+    "jobGroup": "B2B-Voice",
+    "cronExpression": "0 */30 * ? * *",
+    "deploymentId": 223,
+    "description": "test",
+    "batchType": "VCE_ACCT_STG",
+    "dependsOnBatchTypes": ["VCE_FACT_DIM","VCE_PROD_DIM","VCE_ACCT_DIM"]
+
+  },
+  {
+    "jobId":"5",
+    "jobName":"VoiceAccountFact",
+    "jobGroup": "Voice-Hata",
+    "cronExpression": "0 */30 * ? * *",
+    "deploymentId": 225,
+    "description": "test",
+    "batchType": "VCE_ACCT_FACT",
+    "dependsOnBatchTypes": ["VCE_ACCT_STG"]
 
   }
-
 ]

@@ -14,5 +14,11 @@ public class K2Service {
 
     public void triggerExecutionPlan(ScheduleJob scheduleJob) {
         LOG.info(">>>>> jobName = [" + scheduleJob.getJobName() + "]" + " executed.");
+        LOG.info("Deployment Id : "+scheduleJob.getDeploymentId());
+        LOG.info("BatchType : "+scheduleJob.getBatchType());
+        LOG.info("DependsOnBatchType : "+scheduleJob.getDependsOnBatchTypes());
+
+
+
     }
 }

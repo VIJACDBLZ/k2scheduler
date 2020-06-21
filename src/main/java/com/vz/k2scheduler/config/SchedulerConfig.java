@@ -52,21 +52,24 @@ public class SchedulerConfig {
         scheduler.setJobFactory(jobFactory);
 
         // register all jobs
-        List<ScheduleJob> jobs = K2JobFactory.getInitAllJobs();
+        List<ScheduleJob> jobs = K2JobFactory.getAllJobFromConfig();
         for (ScheduleJob job : jobs) {
 
             log.info("Initializing Job :"+ job);
 
             TriggerKey triggerKey = TriggerKey.triggerKey(job.getJobName(), job.getJobGroup());
-            CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
+            CronTrigger trigger = (PauseAwareCronTrigger) scheduler.getTrigger(triggerKey);
             if (null == trigger) {
                 JobDetail jobDetail = JobBuilder.newJob(K2JobFactory.class)
                         .withIdentity(job.getJobName(), job.getJobGroup())
-                        .withDescription(job.getDescription()).build();
+                        .withDescription(job.getDescription())
+                        .storeDurably(true)
+                        .build();
                 jobDetail.getJobDataMap().put("scheduleJob", job);
-                CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job
-                        .getCronExpression());
+                //Added misfire handling instruction do nothing for ignore nextFires during paused state
+                CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCronExpression()).withMisfireHandlingInstructionDoNothing();
                 trigger = TriggerBuilder.newTrigger().withIdentity(job.getJobName(), job.getJobGroup()).withSchedule(scheduleBuilder).build();
+
                 scheduler.scheduleJob(jobDetail, trigger);
             }else {
                 CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job
