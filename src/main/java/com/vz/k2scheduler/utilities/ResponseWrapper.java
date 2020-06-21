@@ -1,32 +1,32 @@
-package com.vz.k2scheduler.model;
+package com.vz.k2scheduler.utilities;
 
 import java.io.Serializable;
 
-public class Message implements Serializable {
+public class ResponseWrapper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static Message failure(String msg) {
-        return new Message(false, msg);
+    public static ResponseWrapper failure(String msg) {
+        return new ResponseWrapper(false, msg);
     }
-    public static Message failure(Exception e) {
-        return new Message(false, e.getMessage());
+    public static ResponseWrapper failure(Exception e) {
+        return new ResponseWrapper(false, e.getMessage());
     }
-    public static Message failure() {
-        return new Message(false);
+    public static ResponseWrapper failure() {
+        return new ResponseWrapper(false);
     }
-    public static Message success() {
-        return new Message(true);
+    public static ResponseWrapper success() {
+        return new ResponseWrapper(true);
     }
-    public static Message success(String msg) {
-        return new Message(true, msg);
+    public static ResponseWrapper success(String msg) {
+        return new ResponseWrapper(true, msg);
     }
-    public Message(boolean valid, String msg) {
+    public ResponseWrapper(boolean valid, String msg) {
         super();
         this.valid = valid;
         this.msg = msg;
     }
-    public Message(boolean valid) {
+    public ResponseWrapper(boolean valid) {
         super();
         this.valid = valid;
     }

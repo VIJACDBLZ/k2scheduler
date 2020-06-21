@@ -1,6 +1,6 @@
 package com.vz.k2scheduler.controller;
 
-import com.vz.k2scheduler.model.ScheduleJob;
+import com.vz.k2scheduler.model.K2JobDetail;
 import com.vz.k2scheduler.service.QuartzService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,14 +17,14 @@ public class IndexController {
 
     @RequestMapping("/")
     public String showHomePage(Model model){
-        List<ScheduleJob> jobList = quartzService.getAllJobList();
+        List<K2JobDetail> jobList = quartzService.getAllJobList();
         model.addAttribute("jobs", jobList);
         return "index";
     }
 
     @RequestMapping("/quartz")
     public String index(Model model){
-        List<ScheduleJob> jobList = quartzService.getAllJobList();
+        List<K2JobDetail> jobList = quartzService.getAllJobList();
         model.addAttribute("jobs", jobList);
         return "quartz";
     }

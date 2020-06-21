@@ -1,7 +1,8 @@
 package com.vz.k2scheduler.config;
 
-import com.vz.k2scheduler.job.K2JobFactory;
-import com.vz.k2scheduler.model.ScheduleJob;
+import com.vz.k2scheduler.job.K2ExecutionJob;
+import com.vz.k2scheduler.model.K2JobDetail;
+import com.vz.k2scheduler.repository.K2JobDetailRepository;
 import com.vz.k2scheduler.spring.AutowiringSpringBeanJobFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,7 @@ public class SchedulerConfig {
 
     @Bean
     @Primary
-    public Scheduler schedulerFactoryBean( JobFactory jobFactory) throws Exception {
+    public Scheduler schedulerFactoryBean(JobFactory jobFactory , K2JobDetailRepository k2JobDetailRepository) throws Exception {
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
         // this allows to update triggers in DB when updating settings in config file
         //factory.setOverwriteExistingJobs(true);
@@ -52,15 +53,15 @@ public class SchedulerConfig {
         scheduler.setJobFactory(jobFactory);
 
         // register all jobs
-        List<ScheduleJob> jobs = K2JobFactory.getAllJobFromConfig();
-        for (ScheduleJob job : jobs) {
+        List<K2JobDetail> jobs = k2JobDetailRepository.findAll();
+        for (K2JobDetail job : jobs) {
 
             log.info("Initializing Job :"+ job);
 
             TriggerKey triggerKey = TriggerKey.triggerKey(job.getJobName(), job.getJobGroup());
-            CronTrigger trigger = (PauseAwareCronTrigger) scheduler.getTrigger(triggerKey);
+            CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
             if (null == trigger) {
-                JobDetail jobDetail = JobBuilder.newJob(K2JobFactory.class)
+                JobDetail jobDetail = JobBuilder.newJob(K2ExecutionJob.class)
                         .withIdentity(job.getJobName(), job.getJobGroup())
                         .withDescription(job.getDescription())
                         .storeDurably(true)

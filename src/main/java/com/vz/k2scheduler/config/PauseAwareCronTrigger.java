@@ -4,6 +4,7 @@ import org.quartz.impl.triggers.CronTriggerImpl;
 
 import java.util.Date;
 
+//Not Used!
 public class PauseAwareCronTrigger extends CronTriggerImpl
 {
     private static final long serialVersionUID = -2609414523458705574L;

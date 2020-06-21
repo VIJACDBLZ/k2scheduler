@@ -2,7 +2,7 @@ package com.vz.k2scheduler.model;
 
 import java.util.Date;
 
-public class K2JobDetails {
+public class K2TriggerDetail {
 
     private Date nextTrigger;
     private Date prevTrigger;

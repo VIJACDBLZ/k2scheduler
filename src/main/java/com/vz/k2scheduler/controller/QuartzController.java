@@ -1,21 +1,18 @@
 package com.vz.k2scheduler.controller;
 
-import com.vz.k2scheduler.model.Message;
-import com.vz.k2scheduler.model.ScheduleJob;
+import com.vz.k2scheduler.utilities.ResponseWrapper;
+import com.vz.k2scheduler.model.K2JobDetail;
 import com.vz.k2scheduler.service.QuartzService;
 
 
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerMetaData;
 import org.slf4j.Logger;
-    import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/quartz")
@@ -42,79 +39,79 @@ public class QuartzController {
     }
 
     @RequestMapping(value = "/pauseJob", method = {RequestMethod.GET, RequestMethod.POST})
-    public Object pauseJob(@RequestBody ScheduleJob job){
+    public Object pauseJob(@RequestBody K2JobDetail job){
         logger.info("pauseJob, job = {}", job);
-        Message message = Message.failure();
+        ResponseWrapper responseWrapper = ResponseWrapper.failure();
         try {
             quartzService.pauseJob(job);
-            message = Message.success();
-            message.setData(quartzService.getJobById(job));
+            responseWrapper = ResponseWrapper.success();
+            responseWrapper.setData(quartzService.getJobById(job));
         } catch (Exception e) {
-            message.setMsg(e.getMessage());
+            responseWrapper.setMsg(e.getMessage());
             logger.error("pauseJob ex:", e);
         }
-        return message;
+        return responseWrapper;
     }
 
     @RequestMapping(value = "/resumeJob", method = {RequestMethod.GET, RequestMethod.POST})
-    public Object resumeJob(@RequestBody ScheduleJob job){
+    public Object resumeJob(@RequestBody K2JobDetail job){
         logger.info("/resumeJob, job = {}", job);
-        Message message = Message.failure();
+        ResponseWrapper responseWrapper = ResponseWrapper.failure();
         try {
             quartzService.resumeJob(job);
-            message = Message.success();
-            message.setData(quartzService.getJobById(job));
+            responseWrapper = ResponseWrapper.success();
+            responseWrapper.setData(quartzService.getJobById(job));
         } catch (Exception e) {
-            message.setMsg(e.getMessage());
+            responseWrapper.setMsg(e.getMessage());
             logger.error("resumeJob ex:", e);
         }
-        return message;
+        return responseWrapper;
     }
 
 
     @RequestMapping(value = "/deleteJob", method = {RequestMethod.GET, RequestMethod.POST})
-    public Object deleteJob(@RequestBody ScheduleJob job){
+    public Object deleteJob(@RequestBody K2JobDetail job){
         logger.info("/deleteJob, job = {}", job);
-        Message message = Message.failure();
+        ResponseWrapper responseWrapper = ResponseWrapper.failure();
         try {
             quartzService.deleteJob(job);
-            message = Message.success();
+            responseWrapper = ResponseWrapper.success();
         } catch (Exception e) {
-            message.setMsg(e.getMessage());
+            responseWrapper.setMsg(e.getMessage());
             logger.error("deleteJob ex:", e);
         }
-        return message;
+        return responseWrapper;
     }
 
     @RequestMapping(value = "/runJob", method = {RequestMethod.GET, RequestMethod.POST})
-    public Object runJob(@RequestBody ScheduleJob job){
+    public Object runJob(@RequestBody K2JobDetail job){
         logger.info("runJob, job = {}", job);
-        Message message = Message.failure();
+        ResponseWrapper responseWrapper = ResponseWrapper.failure();
         try {
             quartzService.runJobOnce(job);
-            message = Message.success();
+            responseWrapper = ResponseWrapper.success();
         } catch (Exception e) {
-            message.setMsg(e.getMessage());
+            responseWrapper.setMsg(e.getMessage());
             logger.error("runJob ex:", e);
         }
-        return message;
+        return responseWrapper;
     }
 
 
     @RequestMapping(value = "/saveOrUpdate", method = {RequestMethod.GET, RequestMethod.POST})
-    public Object saveOrupdate(@RequestBody ScheduleJob job){
+    public Object saveOrupdate(@RequestBody K2JobDetail job){
         logger.info("saveOrUpdate, job = {}", job);
-        Message message = Message.failure();
+        ResponseWrapper responseWrapper = ResponseWrapper.failure();
         try {
             quartzService.saveOrupdate(job);
-            message = Message.success();
-            message.setData(quartzService.getJobById(job));
+            responseWrapper = ResponseWrapper.success();
+            responseWrapper.setData(quartzService.getJobById(job));
 
         } catch (Exception e) {
-            message.setMsg(e.getMessage());
+            responseWrapper.setMsg(e.getMessage());
             logger.error("updateCron ex:", e);
         }
-        return message;
+        return responseWrapper;
     }
 
 

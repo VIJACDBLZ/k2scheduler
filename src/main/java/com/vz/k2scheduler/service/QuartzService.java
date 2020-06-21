@@ -1,8 +1,9 @@
 package com.vz.k2scheduler.service;
 
 import com.google.common.base.Preconditions;
-import com.vz.k2scheduler.job.K2JobFactory;
-import com.vz.k2scheduler.model.ScheduleJob;
+import com.vz.k2scheduler.job.K2ExecutionJob;
+import com.vz.k2scheduler.model.K2JobDetail;
+import com.vz.k2scheduler.repository.K2JobDetailRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.*;
@@ -24,17 +25,20 @@ public class QuartzService {
     @Autowired
     private Scheduler scheduler;
 
-    public List<ScheduleJob> getAllJobList(){
-        List<ScheduleJob> jobList = new ArrayList<>();
+    @Autowired
+    private K2JobDetailRepository k2JobDetailRepository;
+
+    public List<K2JobDetail> getAllJobList(){
+        List<K2JobDetail> jobList = new ArrayList<>();
         try {
             GroupMatcher<JobKey> matcher = GroupMatcher.anyJobGroup();
             Set<JobKey> jobKeySet = scheduler.getJobKeys(matcher);
             for (JobKey jobKey : jobKeySet){
                 List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                 for (Trigger trigger : triggers){
-                    ScheduleJob scheduleJob = new ScheduleJob();
-                    this.wrapScheduleJob(scheduleJob,scheduler,jobKey,trigger);
-                    jobList.add(scheduleJob);
+                    K2JobDetail k2JobDetail = new K2JobDetail();
+                    this.wrapScheduleJob(k2JobDetail,scheduler,jobKey,trigger);
+                    jobList.add(k2JobDetail);
                 }
             }
         } catch (SchedulerException e) {
@@ -43,30 +47,30 @@ public class QuartzService {
         return jobList;
     }
 
-    public ScheduleJob getJobById(ScheduleJob scheduleJob){
+    public K2JobDetail getJobById(K2JobDetail k2JobDetail){
 
-        JobKey jobKey = JobKey.jobKey(scheduleJob.getJobName(), scheduleJob.getJobGroup());
+        JobKey jobKey = JobKey.jobKey(k2JobDetail.getJobName(), k2JobDetail.getJobGroup());
 
 
         try {
             List<? extends Trigger> triggers =  scheduler.getTriggersOfJob(jobKey);
-            this.wrapScheduleJob(scheduleJob , scheduler , jobKey , triggers.get(0));
+            this.wrapScheduleJob(k2JobDetail, scheduler , jobKey , triggers.get(0));
 
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
 
-        return scheduleJob;
+        return k2JobDetail;
     }
 
 
-    public List<ScheduleJob> getRunningJobList() throws SchedulerException{
+    public List<K2JobDetail> getRunningJobList() throws SchedulerException{
 
         List<JobExecutionContext> executingJobList = scheduler.getCurrentlyExecutingJobs();
-        List<ScheduleJob> jobList = new ArrayList<>(executingJobList.size());
+        List<K2JobDetail> jobList = new ArrayList<>(executingJobList.size());
         for(JobExecutionContext executingJob : executingJobList){
-            ScheduleJob scheduleJob = new ScheduleJob();
-            JobDetail jobDetail = executingJob.getJobDetail();
+            K2JobDetail scheduleJob = new K2JobDetail();
+            org.quartz.JobDetail jobDetail = executingJob.getJobDetail();
             JobKey jobKey = jobDetail.getKey();
             Trigger trigger = executingJob.getTrigger();
             this.wrapScheduleJob(scheduleJob,scheduler,jobKey,trigger);
@@ -76,9 +80,9 @@ public class QuartzService {
     }
 
 
-    public void saveOrupdate(ScheduleJob scheduleJob) throws Exception {
+    public void saveOrupdate(K2JobDetail scheduleJob) throws Exception {
         String oldCronExpression;
-        ScheduleJob oldScheduleJob;
+        K2JobDetail oldK2JobDetail;
 
 
         Preconditions.checkNotNull(scheduleJob, "Job is empty");
@@ -92,9 +96,9 @@ public class QuartzService {
             JobKey jobKey = JobKey.jobKey(scheduleJob.getJobName(), scheduleJob.getJobGroup());
             JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 
-            oldScheduleJob = (ScheduleJob) jobDetail.getJobDataMap().get("scheduleJob");
+            oldK2JobDetail = (K2JobDetail) jobDetail.getJobDataMap().get("scheduleJob");
 
-            oldCronExpression = oldScheduleJob.getCronExpression();
+            oldCronExpression = oldK2JobDetail.getCronExpression();
             LOG.info("Old cron expression : "+ oldCronExpression);
             LOG.info("New cron expression : "+ scheduleJob.getCronExpression());
 
@@ -115,12 +119,11 @@ public class QuartzService {
             jobDetail.getJobDataMap().put("scheduleJob", scheduleJob);
             scheduler.addJob(jobDetail, true);
 
-
-
+            k2JobDetailRepository.save(scheduleJob);
         }
     }
 
-    private void addJob(ScheduleJob scheduleJob) throws Exception{
+    private void addJob(K2JobDetail scheduleJob) throws Exception{
         checkNotNull(scheduleJob);
         Preconditions.checkNotNull(scheduleJob.getCronExpression(), "CronExpression is null");
 
@@ -130,11 +133,9 @@ public class QuartzService {
             throw new Exception("job already exists!");
         }
 
-        // simulate job info db persist operation
-        scheduleJob.setJobId(String.valueOf(K2JobFactory.jobList.size()+1));
-        K2JobFactory.jobList.add(scheduleJob);
+        k2JobDetailRepository.save(scheduleJob);
 
-        JobDetail jobDetail = JobBuilder.newJob(K2JobFactory.class)
+        JobDetail jobDetail = JobBuilder.newJob(K2ExecutionJob.class)
                 .withIdentity(scheduleJob.getJobName(),scheduleJob.getJobGroup())
                 .storeDurably(true)
                 .build();
@@ -149,37 +150,37 @@ public class QuartzService {
     }
 
 
-    public void pauseJob(ScheduleJob scheduleJob) throws SchedulerException{
-        checkNotNull(scheduleJob);
-        JobKey jobKey = JobKey.jobKey(scheduleJob.getJobName(), scheduleJob.getJobGroup());
+    public void pauseJob(K2JobDetail k2JobDetail) throws SchedulerException{
+        checkNotNull(k2JobDetail);
+        JobKey jobKey = JobKey.jobKey(k2JobDetail.getJobName(), k2JobDetail.getJobGroup());
         scheduler.pauseJob(jobKey);
     }
 
-    public void resumeJob(ScheduleJob scheduleJob) throws SchedulerException{
-        checkNotNull(scheduleJob);
-        JobKey jobKey = JobKey.jobKey(scheduleJob.getJobName(), scheduleJob.getJobGroup());
+    public void resumeJob(K2JobDetail k2JobDetail) throws SchedulerException{
+        checkNotNull(k2JobDetail);
+        JobKey jobKey = JobKey.jobKey(k2JobDetail.getJobName(), k2JobDetail.getJobGroup());
         scheduler.resumeJob(jobKey);
     }
 
-    public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException{
-        checkNotNull(scheduleJob);
-        JobKey jobKey = JobKey.jobKey(scheduleJob.getJobName(), scheduleJob.getJobGroup());
+    public void deleteJob(K2JobDetail k2JobDetail) throws SchedulerException{
+        checkNotNull(k2JobDetail);
+        JobKey jobKey = JobKey.jobKey(k2JobDetail.getJobName(), k2JobDetail.getJobGroup());
         scheduler.deleteJob(jobKey);
     }
 
-    public void runJobOnce(ScheduleJob scheduleJob) throws SchedulerException{
-        checkNotNull(scheduleJob);
-        JobKey jobKey = JobKey.jobKey(scheduleJob.getJobName(), scheduleJob.getJobGroup());
+    public void runJobOnce(K2JobDetail k2JobDetail) throws SchedulerException{
+        checkNotNull(k2JobDetail);
+        JobKey jobKey = JobKey.jobKey(k2JobDetail.getJobName(), k2JobDetail.getJobGroup());
         scheduler.triggerJob(jobKey);
     }
 
-    private void wrapScheduleJob(ScheduleJob scheduleJob,Scheduler scheduler,JobKey jobKey,Trigger trigger){
+    private void wrapScheduleJob(K2JobDetail scheduleJob, Scheduler scheduler, JobKey jobKey, Trigger trigger){
         try {
             scheduleJob.setJobName(jobKey.getName());
             scheduleJob.setJobGroup(jobKey.getGroup());
 
-            JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-            ScheduleJob job = (ScheduleJob)jobDetail.getJobDataMap().get("scheduleJob");
+            org.quartz.JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+            K2JobDetail job = (K2JobDetail)jobDetail.getJobDataMap().get("scheduleJob");
             scheduleJob.setDescription(job.getDescription());
             scheduleJob.setJobId(job.getJobId());
             scheduleJob.setDeploymentId(job.getDeploymentId());
@@ -190,8 +191,8 @@ public class QuartzService {
             Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
             scheduleJob.setJobStatus(triggerState.name());
 
-            scheduleJob.getJobDetails().setNextTrigger(trigger.getNextFireTime());
-            scheduleJob.getJobDetails().setPrevTrigger(trigger.getPreviousFireTime());
+            scheduleJob.getK2TriggerDetail().setNextTrigger(trigger.getNextFireTime());
+            scheduleJob.getK2TriggerDetail().setPrevTrigger(trigger.getPreviousFireTime());
 
 
 
@@ -207,10 +208,10 @@ public class QuartzService {
         }
     }
 
-    private void checkNotNull(ScheduleJob scheduleJob) {
-        Preconditions.checkNotNull(scheduleJob, "job is null");
-        Preconditions.checkNotNull(scheduleJob.getJobName(), "jobName is null");
-        Preconditions.checkNotNull(scheduleJob.getJobGroup(), "jobGroup is null");
+    private void checkNotNull(K2JobDetail k2JobDetail) {
+        Preconditions.checkNotNull(k2JobDetail, "job is null");
+        Preconditions.checkNotNull(k2JobDetail.getJobName(), "jobName is null");
+        Preconditions.checkNotNull(k2JobDetail.getJobGroup(), "jobGroup is null");
     }
 
 

@@ -94,7 +94,7 @@ var updateCacheAndJobsListing = function(jobs , partialupdate){
                job["batchType"],
                job["deploymentId"],
                job["dependsOnBatchTypes"],
-               new Date(job["jobDetails"]["nextTrigger"]).toLocaleString('en-US'),
+               new Date(job["k2TriggerDetail"]["nextTrigger"]).toLocaleString('en-US'),
                ""
             ]).invalidate().draw();
         }
@@ -122,7 +122,7 @@ var loadJobsListing = function(jobs, append){
                job["batchType"],
                job["deploymentId"],
                job["dependsOnBatchTypes"],
-               new Date(job["jobDetails"]["nextTrigger"]).toLocaleString('en-US'),
+               new Date(job["k2TriggerDetail"]["nextTrigger"]).toLocaleString('en-US'),
                ""
       ]).node().id = jobId;
 
@@ -259,7 +259,7 @@ var updateJob = function(jobId){
 
     job["cronExpression"] = $("#update-cron-expression").val();
     job["deploymentId"] = $("#update-deployment-id").val();
-    job["dependsOnBatchTypes"] = $("#update-depends-on-batchtypes").val().split(',');
+    job["dependsOnBatchTypes"] = $("#update-depends-on-batchtypes").val();
 
     fetch("/quartz/saveOrUpdate?t=" + new Date().getTime(), {
       method: 'POST',
@@ -302,7 +302,7 @@ var createJob = function(){
     job["jobStatus"] ="NORMAL";
     job["cronExpression"] = $("#create-cronexpression").val();
     job["deploymentId"] = $("#create-deploymentid").val();
-    job["dependsOnBatchTypes"] = $("#create-dependsonbatchtypes").val().split(',');
+    job["dependsOnBatchTypes"] = $("#create-dependsonbatchtypes").val();
 
     fetch("/quartz/saveOrUpdate?t=" + new Date().getTime(), {
       method: 'POST',

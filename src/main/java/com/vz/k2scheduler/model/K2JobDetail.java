@@ -1,38 +1,51 @@
 package com.vz.k2scheduler.model;
 
+import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-public class ScheduleJob implements Serializable{
+
+@Entity
+@Table(name = "k2_job_detail")
+public class K2JobDetail{
 
     private static final long serialVersionUID = 1L;
 
-    private String jobId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer jobId;
 
+    @Column(name = "job_name", nullable = false)
     private String jobName;
 
+    @Column(name = "job_group", nullable = false)
     private String jobGroup;
 
+    @Column(name = "job_status")
     private String jobStatus;
 
+    @Column(name = "cron_expression", nullable = false)
     private String cronExpression;
 
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "deployment_id", nullable = false)
     private int deploymentId;
 
+    @Column(name = "batch_type", nullable = false)
     private String batchType;
 
-    private List<String> dependsOnBatchTypes = new ArrayList<>();
+    @Column(name = "depends_on_batchtypes")
+    private String dependsOnBatchTypes;
 
-    private K2JobDetails jobDetails = new K2JobDetails();
+    @Transient
+    private K2TriggerDetail k2TriggerDetail = new K2TriggerDetail();
 
-    public String getJobId() {
+    public Integer getJobId() {
         return jobId;
     }
 
-    public void setJobId(String jobId) {
+    public void setJobId(Integer jobId) {
         this.jobId = jobId;
     }
 
@@ -92,20 +105,20 @@ public class ScheduleJob implements Serializable{
         this.batchType = batchType;
     }
 
-    public List<String> getDependsOnBatchTypes() {
+    public String getDependsOnBatchTypes() {
         return dependsOnBatchTypes;
     }
 
-    public void setDependsOnBatchTypes(List<String> dependsOnBatchTypes) {
+    public void setDependsOnBatchTypes(String dependsOnBatchTypes) {
         this.dependsOnBatchTypes = dependsOnBatchTypes;
     }
 
-    public K2JobDetails getJobDetails() {
-        return jobDetails;
+    public K2TriggerDetail getK2TriggerDetail() {
+        return k2TriggerDetail;
     }
 
-    public void setJobDetails(K2JobDetails jobDetails) {
-        this.jobDetails = jobDetails;
+    public void setK2TriggerDetail(K2TriggerDetail k2TriggerDetail) {
+        this.k2TriggerDetail = k2TriggerDetail;
     }
 
     @Override
@@ -120,7 +133,7 @@ public class ScheduleJob implements Serializable{
                 ", deploymentId=" + deploymentId +
                 ", batchType='" + batchType + '\'' +
                 ", dependsOnBatchTypes=" + dependsOnBatchTypes +
-                ", jobDetails=" + jobDetails +
+                ", triggerDetail=" + k2TriggerDetail +
                 '}';
     }
 }
